@@ -7,15 +7,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
-
+import org.springframework.beans.factory.annotation.Value;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private final WebClient webClient;
 
-    public AuthController(WebClient.Builder builder) {
-        this.webClient = builder.baseUrl("http://localhost:8081").build();
+    public AuthController(WebClient.Builder builder, @Value("${auth.service.url}") String authServiceUrl) {
+        this.webClient = builder.baseUrl(authServiceUrl).build();
     }
 
     @PostMapping("/login")
