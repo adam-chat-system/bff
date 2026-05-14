@@ -13,7 +13,7 @@ public class JwtService {
 
     public JwtService(@Value("${security.jwt.secret}") String secret) {
 
-        if (secret == null || secret.length() < 32) {
+        if (secret == null || secret.isBlank() || secret.length() < 32) {
             throw new IllegalArgumentException("JWT secret must be at least 32 characters");
         }
 
@@ -30,12 +30,8 @@ public class JwtService {
 
     public boolean isTokenValid(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
-
-            return true;
+            String username = extractUsername(token);
+            return username != null && !username.isBlank();
         } catch (Exception e) {
             return false;
         }
