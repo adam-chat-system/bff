@@ -7,7 +7,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import com.chatapp.bff.security.JwtAuthenticationFilter;
 import com.chatapp.bff.security.JwtService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.security.config.http.SessionCreationPolicy;
 @Configuration
 public class SecurityConfig {
     private final JwtService jwtService;
@@ -25,6 +25,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login").permitAll()
                         .anyRequest().authenticated()
