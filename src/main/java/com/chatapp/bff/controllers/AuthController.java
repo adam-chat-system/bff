@@ -39,6 +39,17 @@ public class AuthController {
                 .block();
     }
 
+    @PostMapping("/signup")
+    public String signup(@RequestBody LoginRequestDTO request) {
+
+        return webClient.post()
+                .uri("/auth/signup")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+    }
+
     @GetMapping("/me")
     public String me() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
