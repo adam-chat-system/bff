@@ -39,6 +39,25 @@ public class AuthController {
                 .block();
     }
 
+    @PostMapping("/signup")
+    public String signup(@RequestBody LoginRequestDTO request) {
+
+        return webClient.post()
+                .uri("/auth/signup")
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                )
+                .onStatus(status -> status.is5xxServerError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Auth service error: " + error))
+                )
+                .bodyToMono(String.class)
+                .block();
+    }
+
     @GetMapping("/me")
     public String me() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
