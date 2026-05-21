@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -46,10 +45,12 @@ public class MessageController {
                         .retrieve()
                         .onStatus(status -> status.is4xxClientError(), response ->
                                 response.bodyToMono(String.class)
+                                        .defaultIfEmpty("Upstream client error")
                                         .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
                         )
                         .onStatus(status -> status.is5xxServerError(), response ->
                                 response.bodyToMono(String.class)
+                                        .defaultIfEmpty("Upstream server error")
                                         .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
                         )
                         .bodyToMono(Void.class)
@@ -66,10 +67,12 @@ public class MessageController {
                         .retrieve()
                         .onStatus(status -> status.is4xxClientError(), response ->
                                 response.bodyToMono(String.class)
+                                        .defaultIfEmpty("Upstream client error")
                                         .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
                         )
                         .onStatus(status -> status.is5xxServerError(), response ->
                                 response.bodyToMono(String.class)
+                                        .defaultIfEmpty("Upstream server error")
                                         .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
                         )
                         .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
@@ -85,10 +88,12 @@ public class MessageController {
                         .retrieve()
                         .onStatus(status -> status.is4xxClientError(), response ->
                                 response.bodyToMono(String.class)
+                                        .defaultIfEmpty("Upstream client error")
                                         .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
                         )
                         .onStatus(status -> status.is5xxServerError(), response ->
                                 response.bodyToMono(String.class)
+                                        .defaultIfEmpty("Upstream server error")
                                         .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
                         )
                         .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
@@ -112,10 +117,12 @@ public class MessageController {
                         .retrieve()
                         .onStatus(status -> status.is4xxClientError(), response ->
                                 response.bodyToMono(String.class)
+                                        .defaultIfEmpty("Upstream client error")
                                         .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
                         )
                         .onStatus(status -> status.is5xxServerError(), response ->
                                 response.bodyToMono(String.class)
+                                        .defaultIfEmpty("Upstream server error")
                                         .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
                         )
                         .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
