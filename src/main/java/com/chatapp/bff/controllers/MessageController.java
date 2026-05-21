@@ -1,5 +1,6 @@
 package com.chatapp.bff.controllers;
-
+import reactor.core.publisher.Mono;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import com.chatapp.bff.DTO.requests.MessageRequestDTO;
 import com.chatapp.bff.DTO.responses.MessageResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,71 +39,60 @@ public class MessageController {
         String username = auth.getName();
         request.setSender(username);
 
-
-
-        webClient.post()
-                .uri("/messages")
-                .bodyValue(request)
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
-                )
-                .onStatus(status -> status.is5xxServerError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
-                )
-                .bodyToMono(Void.class)
-                .timeout(Duration.ofSeconds(5))
-                .onErrorMap(TimeoutException.class, ex ->
-                        new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Message service timeout")
-                )
-                .block();
+        blockWithGatewayHandling(
+                webClient.post()
+                        .uri("/messages")
+                        .bodyValue(request)
+                        .retrieve()
+                        .onStatus(status -> status.is4xxClientError(), response ->
+                                response.bodyToMono(String.class)
+                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                        )
+                        .onStatus(status -> status.is5xxServerError(), response ->
+                                response.bodyToMono(String.class)
+                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                        )
+                        .bodyToMono(Void.class)
+        );
     }
 
 
     @GetMapping
     public List<MessageResponseDTO> getAllMessages(){
 
-        return webClient.get()
-                .uri("/messages")
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
-                )
-                .onStatus(status -> status.is5xxServerError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
-                )
-                .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
-                .timeout(Duration.ofSeconds(5))
-                .onErrorMap(TimeoutException.class, ex ->
-                        new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Message service timeout")
-                )
-                .block();
+        return blockWithGatewayHandling(
+                webClient.get()
+                        .uri("/messages")
+                        .retrieve()
+                        .onStatus(status -> status.is4xxClientError(), response ->
+                                response.bodyToMono(String.class)
+                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                        )
+                        .onStatus(status -> status.is5xxServerError(), response ->
+                                response.bodyToMono(String.class)
+                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                        )
+                        .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
+        );
     }
 
     @GetMapping("/sender/{sender}")
     public List<MessageResponseDTO> getBySender(@PathVariable String sender){
 
-        return webClient.get()
-                .uri("/messages/sender/{sender}", sender)
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
-                )
-                .onStatus(status -> status.is5xxServerError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
-                )
-                .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
-                .timeout(Duration.ofSeconds(5))
-                .onErrorMap(TimeoutException.class, ex ->
-                        new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Message service timeout")
-                )
-                .block();
+        return blockWithGatewayHandling(
+                webClient.get()
+                        .uri("/messages/sender/{sender}", sender)
+                        .retrieve()
+                        .onStatus(status -> status.is4xxClientError(), response ->
+                                response.bodyToMono(String.class)
+                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                        )
+                        .onStatus(status -> status.is5xxServerError(), response ->
+                                response.bodyToMono(String.class)
+                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                        )
+                        .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
+        );
     }
 
     @GetMapping("/my")
@@ -116,19 +106,28 @@ public class MessageController {
 
         String username = auth.getName();
 
-        return webClient.get()
-                .uri("/messages/sender/{sender}", username)
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
-                )
-                .onStatus(status -> status.is5xxServerError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
-                )
-                .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
+        return blockWithGatewayHandling(
+                webClient.get()
+                        .uri("/messages/sender/{sender}", username)
+                        .retrieve()
+                        .onStatus(status -> status.is4xxClientError(), response ->
+                                response.bodyToMono(String.class)
+                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                        )
+                        .onStatus(status -> status.is5xxServerError(), response ->
+                                response.bodyToMono(String.class)
+                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                        )
+                        .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
+        );
+    }
+
+    private <T> T blockWithGatewayHandling(Mono<T> mono) {
+        return mono
                 .timeout(Duration.ofSeconds(5))
+                .onErrorMap(WebClientRequestException.class, ex ->
+                        new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service unavailable")
+                )
                 .onErrorMap(TimeoutException.class, ex ->
                         new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Message service timeout")
                 )
