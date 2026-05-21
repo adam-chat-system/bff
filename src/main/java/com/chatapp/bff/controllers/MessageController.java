@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -28,12 +29,15 @@ public class MessageController {
     public void sendMessage(@RequestBody MessageRequestDTO request){
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        request.setSender(username);
 
         if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
         }
+
+        String username = auth.getName();
+        request.setSender(username);
+
+
 
         webClient.post()
                 .uri("/messages")
@@ -48,7 +52,7 @@ public class MessageController {
                                 .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
                 )
                 .bodyToMono(Void.class)
-                .block();
+                .block(Duration.ofSeconds(5));
     }
 
 
@@ -58,8 +62,16 @@ public class MessageController {
         return webClient.get()
                 .uri("/messages")
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                )
+                .onStatus(status -> status.is5xxServerError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                )
                 .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
-                .block();
+                .block(Duration.ofSeconds(5));
     }
 
     @GetMapping("/sender/{sender}")
@@ -68,8 +80,16 @@ public class MessageController {
         return webClient.get()
                 .uri("/messages/sender/{sender}", sender)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                )
+                .onStatus(status -> status.is5xxServerError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                )
                 .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
-                .block();
+                .block(Duration.ofSeconds(5));
     }
 
     @GetMapping("/my")
@@ -86,8 +106,16 @@ public class MessageController {
         return webClient.get()
                 .uri("/messages/sender/{sender}", username)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                )
+                .onStatus(status -> status.is5xxServerError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                )
                 .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
-                .block();
+                .block(Duration.ofSeconds(5));
     }
 
 }
