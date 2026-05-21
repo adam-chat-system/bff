@@ -46,12 +46,16 @@ public class MessageController {
                         .onStatus(status -> status.is4xxClientError(), response ->
                                 response.bodyToMono(String.class)
                                         .defaultIfEmpty("Upstream client error")
-                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                                        .map(error -> {
+                                            return new ResponseStatusException(HttpStatus.BAD_REQUEST, "Upstream client error");
+                                        })
                         )
                         .onStatus(status -> status.is5xxServerError(), response ->
                                 response.bodyToMono(String.class)
                                         .defaultIfEmpty("Upstream server error")
-                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                                        .map(error -> {
+                                            return new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error");
+                                        })
                         )
                         .bodyToMono(Void.class)
         );
@@ -68,12 +72,16 @@ public class MessageController {
                         .onStatus(status -> status.is4xxClientError(), response ->
                                 response.bodyToMono(String.class)
                                         .defaultIfEmpty("Upstream client error")
-                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                                        .map(error -> {
+                                            return new ResponseStatusException(HttpStatus.BAD_REQUEST, "Upstream client error");
+                                        })
                         )
                         .onStatus(status -> status.is5xxServerError(), response ->
                                 response.bodyToMono(String.class)
                                         .defaultIfEmpty("Upstream server error")
-                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                                        .map(error -> {
+                                            return new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error");
+                                        })
                         )
                         .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
         );
@@ -89,12 +97,16 @@ public class MessageController {
                         .onStatus(status -> status.is4xxClientError(), response ->
                                 response.bodyToMono(String.class)
                                         .defaultIfEmpty("Upstream client error")
-                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                                        .map(error -> {
+                                            return new ResponseStatusException(HttpStatus.BAD_REQUEST, "Upstream client error");
+                                        })
                         )
                         .onStatus(status -> status.is5xxServerError(), response ->
                                 response.bodyToMono(String.class)
                                         .defaultIfEmpty("Upstream server error")
-                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                                        .map(error -> {
+                                            return new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error");
+                                        })
                         )
                         .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
         );
@@ -118,12 +130,16 @@ public class MessageController {
                         .onStatus(status -> status.is4xxClientError(), response ->
                                 response.bodyToMono(String.class)
                                         .defaultIfEmpty("Upstream client error")
-                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                                        .map(error -> {
+                                            return new ResponseStatusException(HttpStatus.BAD_REQUEST, "Upstream client error");
+                                        })
                         )
                         .onStatus(status -> status.is5xxServerError(), response ->
                                 response.bodyToMono(String.class)
                                         .defaultIfEmpty("Upstream server error")
-                                        .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                                        .map(error -> {
+                                            return new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error");
+                                        })
                         )
                         .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
         );
