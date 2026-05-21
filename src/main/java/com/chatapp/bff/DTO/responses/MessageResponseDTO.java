@@ -18,4 +18,18 @@ public class MessageResponseDTO {
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+
 }
