@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 @RestController
 @RequestMapping("/messages")
@@ -52,7 +53,11 @@ public class MessageController {
                                 .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
                 )
                 .bodyToMono(Void.class)
-                .block(Duration.ofSeconds(5));
+                .timeout(Duration.ofSeconds(5))
+                .onErrorMap(TimeoutException.class, ex ->
+                        new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Message service timeout")
+                )
+                .block();
     }
 
 
@@ -71,7 +76,11 @@ public class MessageController {
                                 .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
                 )
                 .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
-                .block(Duration.ofSeconds(5));
+                .timeout(Duration.ofSeconds(5))
+                .onErrorMap(TimeoutException.class, ex ->
+                        new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Message service timeout")
+                )
+                .block();
     }
 
     @GetMapping("/sender/{sender}")
@@ -89,7 +98,11 @@ public class MessageController {
                                 .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
                 )
                 .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
-                .block(Duration.ofSeconds(5));
+                .timeout(Duration.ofSeconds(5))
+                .onErrorMap(TimeoutException.class, ex ->
+                        new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Message service timeout")
+                )
+                .block();
     }
 
     @GetMapping("/my")
@@ -115,7 +128,11 @@ public class MessageController {
                                 .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
                 )
                 .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
-                .block(Duration.ofSeconds(5));
+                .timeout(Duration.ofSeconds(5))
+                .onErrorMap(TimeoutException.class, ex ->
+                        new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Message service timeout")
+                )
+                .block();
     }
 
 }
