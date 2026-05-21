@@ -1,0 +1,93 @@
+package com.chatapp.bff.controllers;
+
+import com.chatapp.bff.DTO.requests.MessageRequestDTO;
+import com.chatapp.bff.DTO.responses.MessageResponseDTO;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/messages")
+public class MessageController {
+
+    private final WebClient webClient;
+    public MessageController(WebClient.Builder builder,
+                             @Value("${message.service.url}") String messageServiceUrl) {
+        this.webClient = builder.baseUrl(messageServiceUrl).build();
+    }
+
+    @PostMapping
+    public void sendMessage(@RequestBody MessageRequestDTO request){
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        request.setSender(username);
+
+        if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
+        }
+
+        webClient.post()
+                .uri("/messages")
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(error -> new ResponseStatusException(HttpStatus.BAD_REQUEST, error))
+                )
+                .onStatus(status -> status.is5xxServerError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(error -> new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Message service error: " + error))
+                )
+                .bodyToMono(Void.class)
+                .block();
+    }
+
+
+    @GetMapping
+    public List<MessageResponseDTO> getAllMessages(){
+
+        return webClient.get()
+                .uri("/messages")
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
+                .block();
+    }
+
+    @GetMapping("/sender/{sender}")
+    public List<MessageResponseDTO> getBySender(@PathVariable String sender){
+
+        return webClient.get()
+                .uri("/messages/sender/{sender}", sender)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
+                .block();
+    }
+
+    @GetMapping("/my")
+    public List<MessageResponseDTO> getMyMessages(){
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
+        }
+
+        String username = auth.getName();
+
+        return webClient.get()
+                .uri("/messages/sender/{sender}", username)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<MessageResponseDTO>>() {})
+                .block();
+    }
+
+}
