@@ -30,7 +30,8 @@ public class MessageController {
     public void sendMessage(@RequestBody MessageRequestDTO request){
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
+        System.out.println("AUTH = " + auth);
+        System.out.println("AUTH NAME = " + auth.getName());
         if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
         }
@@ -41,6 +42,7 @@ public class MessageController {
         blockWithGatewayHandling(
                 webClient.post()
                         .uri("/messages")
+                        .header("Content-Type", "application/json")
                         .bodyValue(request)
                         .retrieve()
                         .onStatus(status -> status.is4xxClientError(), response ->
