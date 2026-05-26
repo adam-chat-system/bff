@@ -4,6 +4,13 @@ public class MessageRequestDTO {
     private String sender;
     private String content;
 
+    public MessageRequestDTO() {}
+
+    public MessageRequestDTO(String sender, String content) {
+        this.sender = sender;
+        this.content = content;
+    }
+
     public String getSender() {
         return sender;
     }

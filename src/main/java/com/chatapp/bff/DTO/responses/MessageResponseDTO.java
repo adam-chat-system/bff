@@ -7,6 +7,14 @@ public class MessageResponseDTO {
     private String content;
     private LocalDateTime timestamp;
 
+    public MessageResponseDTO() {}
+
+    public MessageResponseDTO(String sender, String content, LocalDateTime timestamp) {
+        this.sender = sender;
+        this.content = content;
+        this.timestamp = timestamp;
+    }
+
     public String getSender() {
         return sender;
     }
