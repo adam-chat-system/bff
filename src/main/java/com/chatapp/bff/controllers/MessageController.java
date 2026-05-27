@@ -30,8 +30,7 @@ public class MessageController {
     public void sendMessage(@RequestBody MessageRequestDTO request){
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("AUTH = " + auth);
-        System.out.println("AUTH NAME = " + auth.getName());
+
         if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
         }
