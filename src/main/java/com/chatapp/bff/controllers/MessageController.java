@@ -41,6 +41,7 @@ public class MessageController {
         blockWithGatewayHandling(
                 webClient.post()
                         .uri("/messages")
+                        .header("Content-Type", "application/json")
                         .bodyValue(request)
                         .retrieve()
                         .onStatus(status -> status.is4xxClientError(), response ->
